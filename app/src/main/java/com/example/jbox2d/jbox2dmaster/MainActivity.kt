@@ -14,7 +14,7 @@ import kotlinx.android.synthetic.main.activity_main.*
 
 class MainActivity : AppCompatActivity() {
     lateinit var mSensorManager: SensorManager
-    lateinit var mSensor: Sensor
+    lateinit var mSensor: Sensor  // android启动系统的时候，开启的服务之一，启动流程
     private val mlistener: SensorEventListener = object : SensorEventListener {
         override fun onAccuracyChanged(sensor: Sensor?, accuracy: Int) {
         }
@@ -22,7 +22,7 @@ class MainActivity : AppCompatActivity() {
         override fun onSensorChanged(event: SensorEvent?) {
             if (Sensor.TYPE_ACCELEROMETER == event?.sensor?.type) {
                 val x = event.values[0]
-                val y = event.values[1]
+                val y = event.values[1]*2.0f
                 jbColView.onSensorChanged(-x, y)
             }
         }
@@ -39,8 +39,9 @@ class MainActivity : AppCompatActivity() {
 
 
     private fun initSensor() {
+        // 感应器
         mSensorManager = getSystemService(Context.SENSOR_SERVICE) as SensorManager
-        mSensor = mSensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER)
+        mSensor = mSensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER) // 重力传感器类型
     }
 
 
@@ -54,7 +55,9 @@ class MainActivity : AppCompatActivity() {
                 R.mipmap.ic_launcher, R.mipmap.ic_launcher)
         imgs.forEach {
             jbColView.addView(ImageView(this@MainActivity)
-                    .apply { setImageResource(it) }, params)
+                    .apply { setImageResource(it)
+                        setTag(R.id.jb_view_circle_tag, true)// 是圆形就设置true
+                    }, params)
         }
     }
 
@@ -67,6 +70,11 @@ class MainActivity : AppCompatActivity() {
     override fun onPause() {
         super.onPause()
         mSensorManager.unregisterListener(mlistener)
+    }
+
+    override fun onContentChanged() {
+        super.onContentChanged()
+//        setContentView，生成View树之后，会回调它
     }
 
 /* override fun onCreateOptionsMenu(menu: Menu?): Boolean {

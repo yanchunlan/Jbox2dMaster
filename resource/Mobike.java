@@ -58,7 +58,7 @@ public class Mobike {
             if (body != null) {
                 view.setX(metersToPixels(body.getPosition().x) - view.getWidth() / 2);
                 view.setY(metersToPixels(body.getPosition().y) - view.getHeight() / 2);
-                view.setRotation(radiansToDegrees(body.getAngle() % 360));
+                view.setRotation(radiansToDegrees(body.getAngle() % 360));// 弧度变角度
             }
         }
         mViewgroup.invalidate();
@@ -83,7 +83,9 @@ public class Mobike {
 
     private void createWorld(boolean changed) {
         if (world == null) {
+            // 定义世界  创建矢量方向
             world = new World(new Vec2(0, 10.0f));
+            //创建四个方向的静态刚体，让其能够有弹性
             createTopAndBottomBounds();
             createLeftAndRightBounds();
         }
@@ -99,8 +101,9 @@ public class Mobike {
 
     private void createBody(World world, View view) {
         BodyDef bodyDef = new BodyDef();
-        bodyDef.setType(BodyType.DYNAMIC);
+        bodyDef.setType(BodyType.DYNAMIC); // 设置动态
 
+        // 计算中心
         bodyDef.position.set(pixelsToMeters(view.getX() + view.getWidth() / 2),
                 pixelsToMeters(view.getY() + view.getHeight() / 2));
         Shape shape = null;
@@ -110,6 +113,7 @@ public class Mobike {
         } else {
             shape = createPolygonShape(view);
         }
+        // 创建材料系数
         FixtureDef fixture = new FixtureDef();
         fixture.setShape(shape);
         fixture.friction = friction;
@@ -135,23 +139,25 @@ public class Mobike {
     }
 
     private void createTopAndBottomBounds() {
+        // 刚体
         BodyDef bodyDef = new BodyDef();
         bodyDef.type = BodyType.STATIC;
 
+        //矩形
         PolygonShape box = new PolygonShape();
         float boxWidth = pixelsToMeters(width);
-        float boxHeight = pixelsToMeters(ratio);
+        float boxHeight = pixelsToMeters(ratio);  // 1
         box.setAsBox(boxWidth, boxHeight);
 
         FixtureDef fixtureDef = new FixtureDef();
         fixtureDef.shape = box;
         fixtureDef.density = 0.5f;
-        fixtureDef.friction = 0.3f;
-        fixtureDef.restitution = 0.5f;
+        fixtureDef.friction = 0.3f;// 摩擦系数
+        fixtureDef.restitution = 0.5f; // 补偿系数
 
-        bodyDef.position.set(0, -boxHeight);
+        bodyDef.position.set(0, -boxHeight);// 底部弹力墙  -1
         Body topBody = world.createBody(bodyDef);
-        topBody.createFixture(fixtureDef);
+        topBody.createFixture(fixtureDef);// 设置材料系数不同 反弹的不同，铅球，像皮球区别
 
         bodyDef.position.set(0, pixelsToMeters(height) + boxHeight);
         Body bottomBody = world.createBody(bodyDef);
@@ -173,7 +179,7 @@ public class Mobike {
         fixtureDef.friction = 0.3f;
         fixtureDef.restitution = 0.5f;
 
-        bodyDef.position.set(-boxWidth, boxHeight);
+        bodyDef.position.set(-boxWidth, 0);
         Body leftBody = world.createBody(bodyDef);
         leftBody.createFixture(fixtureDef);
 
@@ -214,11 +220,12 @@ public class Mobike {
     public void onSensorChanged(float x, float y) {
         int childCount = mViewgroup.getChildCount();
         for (int i = 0; i < childCount; i++) {
-            Vec2 impulse = new Vec2(x, y);
             View view = mViewgroup.getChildAt(i);
             Body body = (Body) view.getTag(R.id.jb_body_tag);
             if (body != null) {
-                body.applyLinearImpulse(impulse, body.getPosition(), true);
+                // 传入中立方向的运动
+                body.applyLinearImpulse(new Vec2(x, y), body.getPosition(), true);
+//                body.applyLinearImpulse(x, y, view);
             }
         }
     }

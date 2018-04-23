@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <item name="jb_body_tag" type="id"/>
-    <item name="jb_view_circle_tag" type="id"/>
+    <item name="jb_body_tag" type="id"/>  // 设置了一次id就不需要重新设置
+    <item name="jb_view_circle_tag" type="id"/> // 圆形
 </resources>
