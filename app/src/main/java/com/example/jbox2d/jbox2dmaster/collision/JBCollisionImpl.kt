@@ -13,21 +13,21 @@ import java.util.*
 /**
  * @Author:  Ycl
  * @Date:  2018-04-23 14:38
- * @Desc:
+ * @Desc:   JBox2d 具体实现类
  */
 class JBCollisionImpl(private val viewGroup: ViewGroup) {
 
-    lateinit var world: World
-    private val random = Random()
+    private var world: World?=null
+    private val random by lazy { Random() }
 
     private val dt = 1f / 60f
     private val velocityIterations = 3
     private val positionIterations = 10
 
-    private var friction = 0.3f
     private var density = 0.5f
-    private var restitution = 0.3f
-    private var ratio = 50f
+    private val friction = 0.3f
+    private val restitution = 0.3f
+    private val ratio = 50f
 
     private var width: Int = 0
     private var height: Int = 0
@@ -40,18 +40,16 @@ class JBCollisionImpl(private val viewGroup: ViewGroup) {
 
     fun onDraw() {
         // 开启模拟世界
-        if (null != world) {
-            world.step(dt, velocityIterations, positionIterations)
-        }
+            world?.step(dt, velocityIterations, positionIterations)
 
-        val childCount = viewGroup.getChildCount()
+        val childCount = viewGroup.childCount
         for (i in 0 until childCount) {
             val view = viewGroup.getChildAt(i)
-            val body = view.getTag(R.id.jb_body_tag) as Body
+            val body = view.getTag(R.id.jb_body_tag) as? Body
             if (body != null) {
-                view.setX(metersToPixels(body.position.x) - view.getWidth() / 2)
-                view.setY(metersToPixels(body.position.y) - view.getHeight() / 2)
-                view.setRotation((body.angle / 3.14f * 180f) % 360)// 弧度变角度
+                view.x = metersToPixels(body.position.x) - view.getWidth() / 2
+                view.y = metersToPixels(body.position.y) - view.getHeight() / 2
+                view.rotation = (body.angle / 3.14f * 180f) % 360// 弧度变角度
             }
         }
         viewGroup.invalidate()
@@ -59,7 +57,6 @@ class JBCollisionImpl(private val viewGroup: ViewGroup) {
 
     fun onLayout(changed: Boolean) {
         createWorld(changed)
-
     }
 
     fun onSizeChanged(w: Int, h: Int) {
@@ -71,15 +68,21 @@ class JBCollisionImpl(private val viewGroup: ViewGroup) {
         val childCount = viewGroup.childCount
         for (i in 0 until childCount) {
             val view = viewGroup.getChildAt(i)
-            val body = view.getTag(R.id.jb_body_tag) as Body
-            body.applyLinearImpulse(Vec2(x, y), body.position, true)
+            val body = view.getTag(R.id.jb_body_tag) as? Body
+            body?.applyLinearImpulse(Vec2(x, y), body.position, true)
         }
-
     }
 
     fun onRandomChanged() {
-
-
+        val childCount = viewGroup.childCount
+        for (i in 0 until childCount) {
+            val view = viewGroup.getChildAt(i)
+            val body = view.getTag(R.id.jb_body_tag) as? Body
+            body?.applyLinearImpulse(Vec2(
+                    random.nextInt(1000) - 1000f,
+                    random.nextInt(1000) - 1000f),
+                    body.position, true)
+        }
     }
 
     // 创建模拟世界
@@ -94,7 +97,7 @@ class JBCollisionImpl(private val viewGroup: ViewGroup) {
         val childCount = viewGroup.childCount
         for (i in 0 until childCount) {
             val view = viewGroup.getChildAt(i)
-            val body = view.getTag(R.id.jb_body_tag) as Body
+            val body = view.getTag(R.id.jb_body_tag) as? Body
             if (body == null || changed) { // tag==null代表未创建刚体,如果已经绑定了就代表已经创建了刚体
                 createBody(view)
             }
@@ -115,17 +118,17 @@ class JBCollisionImpl(private val viewGroup: ViewGroup) {
 
         val fixtureDef = FixtureDef()
         fixtureDef.shape = box
-        fixtureDef.density = 0.5f
-        fixtureDef.friction = 0.3f// 摩擦系数
-        fixtureDef.restitution = 0.5f // 补偿系数
+        fixtureDef.density = density
+        fixtureDef.friction = friction// 摩擦系数
+        fixtureDef.restitution = restitution // 补偿系数
 
         bodyDef.position.set(0f, -boxHeight)// 底部弹力墙  -1
-        val topBody = world.createBody(bodyDef)
-        topBody.createFixture(fixtureDef)// 设置材料系数不同 反弹的不同，铅球，像皮球区别
+        val topBody = world?.createBody(bodyDef)
+        topBody?.createFixture(fixtureDef)// 设置材料系数不同 反弹的不同，铅球，像皮球区别
 
         bodyDef.position.set(0f, pixelsToMeters(height.toFloat()) + boxHeight)
-        val bottomBody = world.createBody(bodyDef)
-        bottomBody.createFixture(fixtureDef)
+        val bottomBody = world?.createBody(bodyDef)
+        bottomBody?.createFixture(fixtureDef)
     }
 
     private fun createLeftAndRightBounds() {
@@ -137,20 +140,21 @@ class JBCollisionImpl(private val viewGroup: ViewGroup) {
 
         val box = PolygonShape()
         box.setAsBox(boxWidth, boxHeight)
+
         val fixtureDef = FixtureDef()
         fixtureDef.shape = box
-        fixtureDef.density = 0.5f
-        fixtureDef.friction = 0.3f
-        fixtureDef.restitution = 0.5f
+        fixtureDef.density = density
+        fixtureDef.friction = friction
+        fixtureDef.restitution = restitution
 
         bodyDef.position.set(-boxWidth, 0f)
-        val leftBody = world.createBody(bodyDef)
-        leftBody.createFixture(fixtureDef)
+        val leftBody = world?.createBody(bodyDef)
+        leftBody?.createFixture(fixtureDef)
 
 
         bodyDef.position.set(pixelsToMeters(width.toFloat()) + boxWidth, 0f)
-        val rightBody = world.createBody(bodyDef)
-        rightBody.createFixture(fixtureDef)
+        val rightBody = world?.createBody(bodyDef)
+        rightBody?.createFixture(fixtureDef)
     }
 
 
@@ -170,12 +174,11 @@ class JBCollisionImpl(private val viewGroup: ViewGroup) {
         // 计算中心
         bodyDef.position.set(pixelsToMeters(view.x + view.width / 2),
                 pixelsToMeters(view.y + view.height / 2))
-        var shape: Shape? = null
-        val isCircle = view.getTag(R.id.jb_view_circle_tag) as Boolean
-        if (isCircle != null && isCircle) {
-            shape = createCircleShape(view)
+        val isCircle = view.getTag(R.id.jb_view_circle_tag) as? Boolean
+        val shape = if (isCircle != null && isCircle) {
+            createCircleShape(view)
         } else {
-            shape = createPolygonShape(view)
+            createPolygonShape(view)
         }
         val fixture = FixtureDef()
         fixture.setShape(shape)
@@ -183,13 +186,12 @@ class JBCollisionImpl(private val viewGroup: ViewGroup) {
         fixture.restitution = restitution
         fixture.density = density
 
-        val body = world.createBody(bodyDef)
-        body.createFixture(fixture)
-
+        val body = world?.createBody(bodyDef)
+        body?.createFixture(fixture)
 
         view.setTag(R.id.jb_body_tag, body)
         // 设置一个线性运动
-        body.linearVelocity = Vec2(random.nextFloat(), random.nextFloat())
+        body?.linearVelocity = Vec2(random.nextFloat(), random.nextFloat())
     }
 
     private fun createCircleShape(view: View): Shape {

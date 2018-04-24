@@ -8,7 +8,7 @@ import android.widget.FrameLayout
 /**
  * @Author:  Ycl
  * @Date:  2018-04-23 11:59
- * @Desc:   JBox 碰撞容器类
+ * @Desc:   JBox2d 碰撞容器类
  */
 
 class JBCollisionView : FrameLayout {
@@ -16,7 +16,7 @@ class JBCollisionView : FrameLayout {
     constructor(context: Context?) : this(context,null)
     constructor(context: Context?, attrs: AttributeSet?) : this(context, attrs,0)
     constructor(context: Context?, attrs: AttributeSet?, defStyleAttr: Int) : super(context, attrs, defStyleAttr){
-        setWillNotDraw(false)  // 每一贞都要绘制
+        setWillNotDraw(false)
         mJBImpl = JBCollisionImpl(this)
     }
 
