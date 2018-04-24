@@ -16,8 +16,7 @@ import java.util.*
  * @Desc:   JBox2d 具体实现类
  */
 class JBCollisionImpl(private val viewGroup: ViewGroup) {
-
-    private var world: World?=null
+    private var world: World? = null
     private val random by lazy { Random() }
 
     private val dt = 1f / 60f
@@ -32,7 +31,6 @@ class JBCollisionImpl(private val viewGroup: ViewGroup) {
     private var width: Int = 0
     private var height: Int = 0
 
-
     init {
         density = viewGroup.context.resources.displayMetrics.density
 
@@ -40,8 +38,7 @@ class JBCollisionImpl(private val viewGroup: ViewGroup) {
 
     fun onDraw() {
         // 开启模拟世界
-            world?.step(dt, velocityIterations, positionIterations)
-
+        world?.step(dt, velocityIterations, positionIterations)
         val childCount = viewGroup.childCount
         for (i in 0 until childCount) {
             val view = viewGroup.getChildAt(i)
@@ -53,6 +50,10 @@ class JBCollisionImpl(private val viewGroup: ViewGroup) {
             }
         }
         viewGroup.invalidate()
+    }
+
+    private fun metersToPixels(meters: Float): Float {
+        return meters * ratio
     }
 
     fun onLayout(changed: Boolean) {
@@ -155,11 +156,6 @@ class JBCollisionImpl(private val viewGroup: ViewGroup) {
         bodyDef.position.set(pixelsToMeters(width.toFloat()) + boxWidth, 0f)
         val rightBody = world?.createBody(bodyDef)
         rightBody?.createFixture(fixtureDef)
-    }
-
-
-    private fun metersToPixels(meters: Float): Float {
-        return meters * ratio
     }
 
     private fun pixelsToMeters(pixels: Float): Float {

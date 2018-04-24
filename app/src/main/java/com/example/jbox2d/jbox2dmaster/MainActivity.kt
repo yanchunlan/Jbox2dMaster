@@ -17,11 +17,9 @@ import kotlinx.android.synthetic.main.activity_main.*
  */
 class MainActivity : AppCompatActivity() {
     lateinit var mSensorManager: SensorManager
-    lateinit var mSensor: Sensor  // android启动系统的时候，开启的服务之一，启动流程
+    lateinit var mSensor: Sensor
     private val mSensorEventListener: SensorEventListener = object : SensorEventListener {
-        override fun onAccuracyChanged(sensor: Sensor?, accuracy: Int) {
-        }
-
+        override fun onAccuracyChanged(sensor: Sensor?, accuracy: Int) {}
         override fun onSensorChanged(event: SensorEvent?) {
             if (Sensor.TYPE_ACCELEROMETER == event?.sensor?.type) {
                 val x = event.values[0]
@@ -30,26 +28,20 @@ class MainActivity : AppCompatActivity() {
             }
         }
     }
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
-
         initSensor()
         initChildView()
         initListener()
     }
-
     private fun initSensor() {
         mSensorManager = getSystemService(Context.SENSOR_SERVICE) as SensorManager
         mSensor = mSensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER) // 加速度传感器
     }
-
     private fun initChildView() {
         val params = FrameLayout.LayoutParams(FrameLayout.LayoutParams.WRAP_CONTENT,
-                FrameLayout.LayoutParams.WRAP_CONTENT)
-                .apply { gravity = Gravity.CENTER }
-
+                FrameLayout.LayoutParams.WRAP_CONTENT).apply { gravity = Gravity.CENTER }
         val imgs = arrayListOf(R.mipmap.ic_football, R.mipmap.ic_football1,
                 R.mipmap.ic_football2, R.mipmap.ic_football3,
                 R.mipmap.ic_football4, R.mipmap.ic_football5, R.mipmap.ic_football6)
@@ -61,7 +53,6 @@ class MainActivity : AppCompatActivity() {
                     }, params)
         }
     }
-
     private fun initListener() {
         bt_jump.setOnClickListener { jbColView.onRandomChanged() }
         bt_sensor.setOnClickListener {
@@ -77,8 +68,6 @@ class MainActivity : AppCompatActivity() {
             }
         }
     }
-
-
     override fun onResume() {
         super.onResume()
         val tag = bt_sensor.tag as? Boolean
@@ -86,7 +75,6 @@ class MainActivity : AppCompatActivity() {
             mSensorManager.registerListener(mSensorEventListener, mSensor, SensorManager.SENSOR_DELAY_UI)
         }
     }
-
     override fun onPause() {
         super.onPause()
         val tag = bt_sensor.tag as? Boolean
@@ -94,8 +82,6 @@ class MainActivity : AppCompatActivity() {
             mSensorManager.unregisterListener(mSensorEventListener)
         }
     }
-
-
 /* override fun onCreateOptionsMenu(menu: Menu?): Boolean {
      menuInflater.inflate(R.menu.jb_menu, menu)
      return super.onCreateOptionsMenu(menu)
